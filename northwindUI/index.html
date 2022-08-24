@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="signalr.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        var options = {
+	animationEnabled: true,
+	title: {
+		text: "Web Socket ile dinamik grafik"
+	},
+	axisY: {
+		title: "Freight",
+		suffix: ""
+	},
+	axisX: {
+		title: "Employees"
+	},
+	data: [{
+		type: "column",
+		yValueFormatString: "#,##0.0#",
+		dataPoints: []
+	    }]
+    };
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:5001/siparishub")
+            .withAutomaticReconnect([1000,1000,2000])
+            .build();
+        connection.start();
+        connection.on("receiveMessage",message=>{
+            options.data[0].dataPoints=[];
+            message.forEach(element => {
+                options.data[0].dataPoints.push(element);
+            });
+            $("#chartContainer").CanvasJSChart(options);
+        });
+    });
+    </script>
+</head>
+<body>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+</body>
+</html>
